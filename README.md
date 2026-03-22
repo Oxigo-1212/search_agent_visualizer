@@ -1,116 +1,160 @@
 # 8-Puzzle Solver
 
-This repository contains a small 8-puzzle solver library and a desktop GUI built with Tkinter.
+[![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Features:
-- Puzzle state and problem abstractions
-- Breadth-first search (BFS) solver
-- Desktop GUI to edit initial/goal states, shuffle, and animate the solution
+A modern 8-puzzle solver with a clean desktop GUI. Built with Python and Tkinter, featuring BFS search and interactive puzzle visualization.
 
-Quickstart
-1. Install dependencies: python -m pip install -e .
-2. Run the GUI: python -m src.puzzle.gui
+## ✨ Features
 
-Ubuntu (uv) - install & build tutorial (concise)
+- **Core Solver**: Breadth-first search (BFS) algorithm for optimal solutions
+- **Desktop GUI**: Interactive Tkinter interface for puzzle manipulation
+- **Visual Tools**: Edit initial/goal states, shuffle puzzles, and animate solutions
+- **Cross-Platform**: Build native executables for Linux, macOS, and Windows
 
-This minimal tutorial covers Ubuntu using the "uv" Python manager to simplify
-environment management. uv creates and manages virtual environments and Python
-versions for you; it can be used instead of manually creating venvs.
+## 🚀 Quick Start
 
-1) Install uv (one-line installer)
+### Development Mode
 
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   export PATH="$HOME/.local/bin:$PATH"  # or restart your shell
+```bash
+# Install dependencies
+python -m pip install -e .
 
-2) Create a virtual environment and install PyInstaller
+# Run the GUI
+python -m src.puzzle.gui
+```
 
-   # create a venv using uv (example requests Python 3.12)
-   uv venv --python 3.12
-   # install PyInstaller and the package into the uv-managed venv
-   uv pip install --upgrade pip
-   uv pip install -e .
+## 🏗️ Building Executables
 
-3) Build the single-file executable with PyInstaller
+We use [uv](https://github.com/astral-sh/uv) for fast, reliable Python environment management and [PyInstaller](https://pyinstaller.org/) for creating standalone executables.
 
-   uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
+### Ubuntu / Debian
 
-   The produced binary will be at: ./dist/8-puzzle_solver
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
 
+# Create environment and build
+uv venv --python 3.14
+uv pip install --upgrade pip
+uv pip install -e .
+uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
+```
 
-Using uv on a clean machine (Ubuntu / Arch)
+**Output**: `./dist/8-puzzle_solver`
 
-Ubuntu (minimal steps)
+### Arch Linux
 
-  # install uv (one-line installer)
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  export PATH="$HOME/.local/bin:$PATH"  # or restart your shell
+```bash
+# Install uv (AUR)
+yay -S --noconfirm uv
+export PATH="$HOME/.local/bin:$PATH"
 
-  # create a uv-managed venv, install dependencies, and build
-  uv venv --python 3.14
-  uv pip install --upgrade pip
-  uv pip install -e .
-  uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
+# Create environment and build
+uv venv --python 3.14
+uv pip install --upgrade pip
+uv pip install -e .
+uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
+```
 
-Arch Linux (minimal steps)
+**Output**: `./dist/8-puzzle_solver`
 
-  # install uv (AUR) or use the installer above; example with yay:
-  yay -S --noconfirm uv
-  export PATH="$HOME/.local/bin:$PATH"  # ensure uv is on PATH
+### Windows (PowerShell)
 
-  # create a uv-managed venv, install dependencies, and build
-  uv venv --python 3.14
-  uv pip install --upgrade pip
-  uv pip install -e .
-  uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
+```powershell
+# Install pipx and uv
+python -m pip install --user pipx
+python -m pipx ensurepath
+# Restart shell
+pipx install uv
 
-Notes
+# Create environment and build
+uv venv --python 3.14
+uv pip install --upgrade pip
+uv pip install -e .
+uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src\main.py
+```
 
-- If your Python version does not meet pyproject.toml's requires-python constraint
-  (>=3.14), install a compatible Python or relax the constraint locally for
-  testing. For a local build, installing PyInstaller and the package in a
-  supported Python environment is usually sufficient.
-- If PyInstaller misses modules, ensure the package is installed in the venv
-  (pip install -e .) and use --paths src so PyInstaller finds source modules.
+**Output**: `.\dist\8-puzzle_solver.exe`
 
-Windows (uv-based, untested)
+### Windows (Command Prompt)
 
-This short, untested guide shows how to produce a Windows executable (.exe)
-using the uv manager. On Windows it's easiest to install uv via pipx and then
-use uv to create and manage a virtual environment.
+```cmd
+python -m pip install --user pipx
+python -m pipx ensurepath
+REM Restart shell
+pipx install uv
+uv venv --python 3.14
+uv pip install --upgrade pip
+uv pip install -e .
+uv run pyinstaller --onefile --name 8-puzzle_solver --paths src\main.py
+```
 
-PowerShell (recommended):
+**Output**: `.\dist\8-puzzle_solver.exe`
 
-  # install pipx (if not installed)
-  python -m pip install --user pipx
-  python -m pipx ensurepath
-  # restart your shell or open a new PowerShell window now
+## 📋 Requirements
 
-  # install uv via pipx
-  pipx install uv
+- **Python**: 3.14 or higher
+- **System Dependencies**:
+  - Ubuntu/Debian: `python3`, `python3-venv`, `python3-pip`
+  - Arch Linux: `python`, `python-virtualenv`, `base-devel`
+  - Windows: Python 3.14+ from [python.org](https://www.python.org/downloads/)
+- **Build Tools** (for C extensions):
+  - Linux: `build-essential` / `base-devel`
+  - Windows: [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)
 
-  # create a uv-managed venv and install deps
-  uv venv --python 3.14
-  uv pip install --upgrade pip
-  uv pip install -e .
+## 🔧 Troubleshooting
 
-  # build (outputs .exe in dist\)
-  uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src\main.py
+### Python Version Issues
 
-Command Prompt (cmd.exe):
+If `pip` refuses to install due to the `requires-python` constraint (>=3.14):
 
-  python -m pip install --user pipx
-  python -m pipx ensurepath
-  # restart cmd/PowerShell so pipx is on PATH
-  pipx install uv
-  uv venv --python 3.14
-  uv pip install --upgrade pip
-  uv pip install -e .
-  uv run pyinstaller --onefile --name 8-puzzle_solver --paths src\main.py
+- Install a compatible Python version, or
+- Edit `pyproject.toml` to relax the constraint for local testing
 
-The produced artifact will be at: .\dist\8-puzzle_solver.exe
+### PyInstaller Missing Modules
 
-Notes for Windows builds:
-- If your project or dependencies include C extensions, you may need the
-  Microsoft Visual C++ Build Tools installed (Visual Studio Build Tools).
-- This Windows guide is untested in this repository; please report back any
-  failures and I can help iterate on the steps.
+If PyInstaller fails to find modules:
+
+```bash
+# Ensure package is installed in the venv
+uv pip install -e .
+
+# Use --paths to include source directory
+uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
+```
+
+### Windows Build Issues
+
+- Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022) for C extension support
+- Run PowerShell as Administrator if needed
+- The Windows build guide is untested—please report issues
+
+## 📦 Project Structure
+
+```
+8-puzzle_solver/
+├── src/
+│   ├── puzzle/
+│   │   ├── gui.py          # Desktop GUI
+│   │   ├── state.py        # Puzzle state representation
+│   │   ├── problem.py      # Problem definition
+│   │   └── search_agents/  # Search algorithms
+│   └── main.py             # Entry point
+├── dist/                   # Built executables
+├── pyproject.toml          # Project configuration
+└── README.md               # This file
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+**Note**: The Windows build instructions are untested. If you encounter issues, please report them so we can improve the documentation.
