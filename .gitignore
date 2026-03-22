@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# PyInstaller output
+dist/
+build/
+
+# Pytest cache
+.pytest_cache/
+
+# ruff cache
+.ruff_cache/
+
+# Editor directories
+.vscode/
+.idea/
