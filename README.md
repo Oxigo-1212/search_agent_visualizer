@@ -22,6 +22,8 @@ python -m pip install -e .
 
 # Run the GUI
 python -m src.puzzle.gui
+# Alternatively, run directly (for development)
+python src/puzzle/gui.py
 ```
 
 ## 🏗️ Building Executables
@@ -140,11 +142,20 @@ uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
 │   │   ├── gui.py          # Desktop GUI
 │   │   ├── state.py        # Puzzle state representation
 │   │   ├── problem.py      # Problem definition
+│   │   ├── utils.py        # Utility functions (e.g., solvability check)
 │   │   └── search_agents/  # Search algorithms
-│   └── main.py             # Entry point
+│   │       ├── algorithm.py
+│   │       ├── node.py
+│   │       └── __init__.py
+│   ├── main.py             # Entry point
+│   └── __init__.py
+├── tests/
+│   └── ...                 # Test files
 ├── dist/                   # Built executables
+├── build/                  # Build directory
 ├── pyproject.toml          # Project configuration
-└── README.md               # This file
+├── README.md               # This file
+└── .gitignore              # Git ignore file
 ```
 
 ## 🤝 Contributing
