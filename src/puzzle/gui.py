@@ -1,14 +1,23 @@
 from __future__ import annotations
 
+# Enable direct script execution (python src/puzzle/gui.py)
+import sys as _sys
+from pathlib import Path as _Path
+
+_src = _Path(__file__).resolve().parent.parent
+if _src.name == "src" and str(_src) not in _sys.path:
+    _sys.path.insert(0, str(_src))
+del _sys, _Path, _src  # Clean up namespace
+
 import time
 import tracemalloc
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from .state import PuzzleState
-from .problem import PuzzleProblem
-from .search_agents.algorithm import bfs
-from .utils import action_extractor
+from puzzle.state import PuzzleState
+from puzzle.problem import PuzzleProblem
+from puzzle.search_agents.algorithm import bfs, dfs, depth_limited_dfs
+from puzzle.utils import action_extractor, is_solvable
 
 
 class PuzzleGUI(tk.Tk):
@@ -156,13 +165,25 @@ class PuzzleGUI(tk.Tk):
         )
         self.btn_shuffle.grid(row=0, column=0, padx=10, ipadx=6, ipady=4)
 
+        self.algorithm_var = tk.StringVar(value="BFS")
+
+        self.algo_dropdown = ttk.Combobox(
+            self.control_frame,
+            textvariable=self.algorithm_var,
+            values=["BFS", "DFS", "Depth-Limited DFS"],
+            state="readonly",
+            font=self.body_font,
+            width=18,
+        )
+        self.algo_dropdown.grid(row=0, column=1, padx=10, ipady=4)
+
         self.btn_solve = ttk.Button(
             self.control_frame,
-            text="Solve (BFS)",
+            text="Solve",
             command=self.solve_puzzle,
             style="Success.TButton",
         )
-        self.btn_solve.grid(row=0, column=1, padx=10, ipadx=6, ipady=4)
+        self.btn_solve.grid(row=0, column=2, padx=10, ipadx=6, ipady=4)
 
         # Benchmark results Frame
         stats_frame = ttk.LabelFrame(
@@ -351,8 +372,17 @@ class PuzzleGUI(tk.Tk):
         if self.is_solving:
             return
 
+        if not is_solvable(self.current_state, self.goal_state):
+            messagebox.showwarning(
+                "Unsolvable Puzzle",
+                "The current initial and goal states are not solvable. Please adjust the puzzle and try again.",
+            )
+            return
+
         self.is_solving = True
-        self.btn_solve.config(state=tk.DISABLED, text="Solving...")
+        algo_name = self.algorithm_var.get()
+        self.btn_solve.config(state=tk.DISABLED, text=f"Solving...")
+        self.algo_dropdown.config(state=tk.DISABLED)
         self.btn_shuffle.config(state=tk.DISABLED)
         self.update()  # Force UI update before heavy computation
 
@@ -361,12 +391,28 @@ class PuzzleGUI(tk.Tk):
         tracemalloc.start()
         start_time = time.perf_counter()
 
-        result = bfs(
-            problem,
-            self.current_state,
-            action_extractor,
-            return_nodes_expanded=True,
-        )
+        if algo_name == "DFS":
+            result = dfs(
+                problem,
+                self.current_state,
+                action_extractor,
+                return_nodes_expanded=True,
+            )
+        elif algo_name == "Depth-Limited DFS":
+            result = depth_limited_dfs(
+                problem,
+                self.current_state,
+                action_extractor,
+                limit=50,
+                return_nodes_expanded=True,
+            )
+        else:
+            result = bfs(
+                problem,
+                self.current_state,
+                action_extractor,
+                return_nodes_expanded=True,
+            )
 
         solution_node, nodes_expanded = result
 
@@ -413,13 +459,19 @@ class PuzzleGUI(tk.Tk):
 
     def reset_buttons(self):
         self.is_solving = False
-        self.btn_solve.config(state=tk.NORMAL, text="Solve (BFS)")
+        self.btn_solve.config(state=tk.NORMAL, text="Solve")
+        self.algo_dropdown.config(state="readonly")
         self.btn_shuffle.config(state=tk.NORMAL)
 
 
-def main():
+def GUIloop():
+    """Create the PuzzleGUI and run its mainloop."""
     app = PuzzleGUI()
     app.mainloop()
+
+
+def main():
+    GUIloop()
 
 
 if __name__ == "__main__":
