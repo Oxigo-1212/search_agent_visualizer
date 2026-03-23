@@ -151,8 +151,6 @@ uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src/main.py
 │   └── __init__.py
 ├── tests/
 │   └── ...                 # Test files
-├── dist/                   # Built executables
-├── build/                  # Build directory
 ├── pyproject.toml          # Project configuration
 ├── README.md               # This file
 └── .gitignore              # Git ignore file
