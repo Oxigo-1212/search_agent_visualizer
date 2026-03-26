@@ -47,3 +47,18 @@ def is_solvable(state: PuzzleState, goal_state: PuzzleState) -> bool:
     return (inv_start + blank_row_from_bottom) % 2 == (
         inv_goal + blank_row_from_bottom_goal
     ) % 2
+
+
+def manhattan_distance(state: PuzzleState, goal_state: PuzzleState) -> int:
+    goal_pos = {}
+    for idx, tile in enumerate(goal_state.tiles):
+        if tile != 0:
+            goal_pos[tile] = divmod(idx, 3)
+
+    def tile_distance(tile: int) -> int:
+        cur_idx = state.tiles.index(tile)
+        cur_row, cur_col = divmod(cur_idx, 3)
+        goal_row, goal_col = goal_pos[tile]
+        return abs(cur_row - goal_row) + abs(cur_col - goal_col)
+
+    return sum(tile_distance(t) for t in range(1, 9))

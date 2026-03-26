@@ -8,6 +8,9 @@ class GraphProblem:
     def get_neighbors(self, state: str) -> list[str]:
         return self.graph.get(state, [])
 
+    def step_cost(self, from_state, to_state, action):
+        return 1
+
 
 def _action_extractor(src: str, dst: str) -> str:
     return f"{src}->{dst}"

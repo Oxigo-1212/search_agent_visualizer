@@ -18,6 +18,18 @@ def problem(start_state: PuzzleState, goal_state: PuzzleState) -> PuzzleProblem:
     return PuzzleProblem(initial_state=start_state, goal_state=goal_state)
 
 
+@pytest.fixture
+def problem_factory(start_state: PuzzleState, goal_state: PuzzleState):
+    def _create(cost_function=None) -> PuzzleProblem:
+        return PuzzleProblem(
+            initial_state=start_state,
+            goal_state=goal_state,
+            cost_function=cost_function,
+        )
+
+    return _create
+
+
 def test_is_goal_false(problem: PuzzleProblem, start_state: PuzzleState):
     assert not problem.is_goal(start_state)
 
@@ -66,3 +78,23 @@ def test_goal_is_reachable_within_few_moves(problem, start_state, goal_state):
                 visited.add(nb)
                 frontier.append((nb, depth + 1))
     pytest.fail("Goal not found within depth 20")
+
+
+def test_step_cost_uniform(problem: PuzzleProblem, start_state: PuzzleState):
+    for neighbour in problem.get_neighbors(start_state):
+        assert problem.step_cost(start_state, neighbour, action=None) == 1
+
+
+def test_step_cost_non_uniform(
+    problem_factory, start_state: PuzzleState, goal_state: PuzzleState
+):
+    def cost_function(
+        from_state: PuzzleState, to_state: PuzzleState, action: object
+    ) -> int:
+        return 7 if to_state == goal_state else 3
+
+    custom_problem = problem_factory(cost_function=cost_function)
+    assert custom_problem.step_cost(start_state, goal_state, action="move") == 7
+
+    neighbour = custom_problem.get_neighbors(start_state)[0]
+    assert custom_problem.step_cost(start_state, neighbour, action="move") == 3

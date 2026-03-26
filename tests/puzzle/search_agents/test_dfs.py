@@ -12,6 +12,12 @@ class GraphProblem:
     def is_goal(self, state: str) -> bool:
         return state == self.goal
 
+    def get_goal(self, state: str) -> str:
+        return self.goal
+
+    def step_cost(self, from_state, to_state, action):
+        return 1
+
 
 def _action_extractor(src: str, dst: str) -> str:
     return f"{src}->{dst}"
@@ -33,10 +39,17 @@ def test_dfs_finds_shortest_solution_path():
     result = dfs(problem, "A", _action_extractor)
 
     assert result is not None
-    assert result.state == "G"
-    assert result.depth == 2
-    assert result.path_cost == 2
-    assert result.solution() == ["A->C", "C->G"]
+    # Unpack if it's a tuple (when return_nodes_expanded=True)
+    if isinstance(result, tuple):
+        node, _ = result
+        assert node is not None, "Expected a node but got None in tuple"
+    else:
+        node = result
+
+    assert node.state == "G"
+    assert node.depth == 2
+    assert node.path_cost == 2
+    assert node.solution() == ["A->C", "C->G"]
 
 
 def test_dfs_returns_none_when_goal_unreachable():

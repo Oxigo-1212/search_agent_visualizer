@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 from itertools import batched
-from typing import List
+from typing import Callable, List, Tuple
 from .state import PuzzleState
 
 
 class PuzzleProblem:
-    def __init__(self,
-                 initial_state: PuzzleState,
-                 goal_state: PuzzleState) -> None:
+    def __init__(
+        self,
+        initial_state: PuzzleState,
+        goal_state: PuzzleState,
+        cost_function: Callable[[PuzzleState,
+                                 PuzzleState, object], int] | None = None,
+    ) -> None:
         self.initial_state = initial_state
         self.goal_state = goal_state
+        self.cost_function = cost_function or (
+            lambda from_state, to_state, action: 1)
 
     def is_goal(self, state: PuzzleState) -> bool:
         return state == self.goal_state
@@ -34,3 +40,12 @@ class PuzzleProblem:
                 new_tiles = tuple(cell for row in new_grid for cell in row)
                 neighbors.append(PuzzleState(new_tiles))
         return neighbors
+
+    def get_goal(self, state: PuzzleState) -> PuzzleState:
+        return self.goal_state
+
+    def step_cost(
+        self, from_state: PuzzleState, to_state: PuzzleState,
+        action: Tuple[int, int]
+    ) -> int:
+        return self.cost_function(from_state, to_state, action)
