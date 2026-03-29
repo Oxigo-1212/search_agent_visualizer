@@ -14,8 +14,10 @@ class ProblemProtocol(Protocol[StateType, ActionType]):
     def get_neighbors(self, state: StateType) -> List[StateType]: ...
     def is_goal(self, state: StateType) -> bool: ...
     def get_goal(self, state: StateType) -> StateType: ...
-    def step_cost(self, from_state: StateType,
-                  to_state: StateType, action: ActionType) -> int: ...
+
+    def step_cost(
+        self, from_state: StateType, to_state: StateType, action: ActionType
+    ) -> int: ...
 
 
 def bfs(
@@ -44,9 +46,12 @@ def bfs(
                     state=neighbor,
                     parent=current,
                     action=action_extractor(current.state, neighbor),
-                    path_cost=current.path_cost +
-                    problem.step_cost(current.state, neighbor,
-                                      action_extractor(current.state, neighbor)),
+                    path_cost=current.path_cost
+                    + problem.step_cost(
+                        current.state,
+                        neighbor,
+                        action_extractor(current.state, neighbor),
+                    ),
                     depth=current.depth + 1,
                 )
                 if problem.is_goal(neighbor):
@@ -83,9 +88,12 @@ def dfs(
                     state=neighbor,
                     parent=current_state,
                     action=action_extractor(current_state.state, neighbor),
-                    path_cost=current_state.path_cost +
-                    problem.step_cost(current_state.state, neighbor,
-                                      action_extractor(current_state.state, neighbor)),
+                    path_cost=current_state.path_cost
+                    + problem.step_cost(
+                        current_state.state,
+                        neighbor,
+                        action_extractor(current_state.state, neighbor),
+                    ),
                     depth=current_state.depth + 1,
                 )
                 if problem.is_goal(neighbor):
@@ -122,8 +130,12 @@ def depth_limited_dfs(
                     state=neighbor,
                     parent=current_state,
                     action=action_extractor(current_state.state, neighbor),
-                    path_cost=current_state.path_cost + problem.step_cost(
-                        current_state.state, neighbor, action_extractor(current_state.state, neighbor)),
+                    path_cost=current_state.path_cost
+                    + problem.step_cost(
+                        current_state.state,
+                        neighbor,
+                        action_extractor(current_state.state, neighbor),
+                    ),
                     depth=current_state.depth + 1,
                 )
                 if problem.is_goal(neighbor):
@@ -150,13 +162,21 @@ def greedy_best_first_search(
         return (start_node, 0) if return_nodes_expanded else start_node
     frontier = []
     visited = {initial_state}
-    heapq.heappush(frontier, (heuristic(
-        initial_state, goal_state), start_node))
+    # Add a tie breaker to avoid comparing Node objects when heuristics are equal
+    tie_breaker = 0
+    heapq.heappush(
+        frontier, (heuristic(initial_state, goal_state),
+                   tie_breaker, start_node)
+    )
     while frontier:
-        current_node = heapq.heappop(frontier)
+        _, _, current_node = heapq.heappop(frontier)
         nodes_expanded += 1
         if problem.is_goal(current_node.state):
-            return (current_node, nodes_expanded) if return_nodes_expanded else current_node
+            return (
+                (current_node, nodes_expanded)
+                if return_nodes_expanded
+                else current_node
+            )
         for neighbor in problem.get_neighbors(current_node.state):
             if neighbor not in visited:
                 visited.add(neighbor)
@@ -164,10 +184,64 @@ def greedy_best_first_search(
                     state=neighbor,
                     parent=current_node,
                     action=action_extractor(current_node.state, neighbor),
-                    path_cost=current_node.path_cost + problem.step_cost(
-                        current_node.state, neighbor, action_extractor*(current_node.state, neighbor)),
+                    path_cost=current_node.path_cost
+                    + problem.step_cost(
+                        current_node.state,
+                        neighbor,
+                        action_extractor(current_node.state, neighbor),
+                    ),
                     depth=current_node.depth + 1,
                 )
+                tie_breaker += 1
                 heapq.heappush(
-                    frontier, (heuristic(neighbor, goal_state), child))
+                    frontier, (heuristic(neighbor, goal_state),
+                               tie_breaker, child)
+                )
     return (None, nodes_expanded) if return_nodes_expanded else None
+
+
+def hill_climbing_search(
+    problem: ProblemProtocol[StateType, ActionType],
+    initial_state: StateType,
+    action_extractor: Callable[[StateType, StateType], ActionType],
+    heuristic: Callable[[StateType, StateType], int],
+    return_nodes_expanded: bool = False
+) -> (
+    Optional[Node[StateType, ActionType]]
+    | tuple[Optional[Node[StateType, ActionType]], int]
+):
+    current = Node(state=initial_state, parent=None,
+                   action=None, path_cost=0, depth=0)
+    nodes_expanded = 0
+    visited = {initial_state}
+    while True:
+        if problem.is_goal(current.state):
+            return (current, nodes_expanded) if return_nodes_expanded else current
+        nodes_expanded += 1
+        best_neighbor = None
+        best_heuristic = heuristic(
+            current.state, problem.get_goal(current.state))
+        for neighbor in problem.get_neighbors(current.state):
+            if neighbor not in visited:
+                child = Node(
+                    state=neighbor,
+                    parent=current,
+                    action=action_extractor(current.state, neighbor),
+                    path_cost=current.path_cost
+                    + problem.step_cost(
+                        current.state,
+                        neighbor,
+                        action_extractor(current.state, neighbor),
+                    ),
+                    depth=current.depth + 1,
+                )
+                child_heuristic = heuristic(
+                    neighbor, problem.get_goal(current.state))
+                if child_heuristic < best_heuristic:
+                    best_neighbor = child
+                    best_heuristic = child_heuristic
+                visited.add(neighbor)
+        if best_neighbor is None:
+            break
+        current = best_neighbor
+    return (current, nodes_expanded) if return_nodes_expanded else current
