@@ -90,7 +90,7 @@ pipx install uv
 uv venv --python 3.14
 uv pip install --upgrade pip
 uv pip install -e .
-uv run pyinstaller --onefile --name 8-puzzle_solver --paths src\main.py
+uv run pyinstaller --onefile --name 8-puzzle_solver --paths src src\main.py
 ```
 
 **Output**: `.\dist\8-puzzle_solver.exe`
